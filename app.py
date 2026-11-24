@@ -4,8 +4,8 @@ import json, os, base64, time
 
 app = Flask(__name__)
 DATA_FILE = "businesses.json"
-ADMIN_PIN = "1234"
-OWNER_PHONE = "265880123456"
+ADMIN_PIN = "1995"
+OWNER_PHONE = "265986765421"
 
 PWA_HEAD = """
 <link rel="manifest" href="/manifest.json">
@@ -138,10 +138,15 @@ def manifest():
 
 @app.route('/sw.js')
 def sw():
-    return """
-self.addEventListener('install', e => { self.skipWaiting(); });
-self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))); });
-""", 200, {'Content-Type': 'application/javascript'}
+    return "self.addEventListener('install', e => { self.skipWaiting(); }); self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))); });", 200, {'Content-Type': 'application/javascript'}
+
+def build_thumbs(idx, images):
+    parts = []
+    for i, im in enumerate(images):
+        cls = "active" if i == 0 else ""
+        part = "<img src='" + im + "' class='" + cls + "' onclick=\"swap(" + str(idx) + ", '" + im + "', this)\">"
+        parts.append(part)
+    return "<div class='thumbs'>" + "".join(parts) + "</div>"
 
 @app.route('/')
 def home():
@@ -157,25 +162,127 @@ def home():
     indexed = sorted(indexed, key=lambda x: (not x[1].get('featured', False), not (time.time() - x[1].get('updated',0) < 7*24*3600)))
     cards=""
     for idx, b in indexed:
-        wa_text = quote(f"Hi {b['name']}! I found you on Bizworld. I want to order / enquire.")
+        wa_text = quote("Hi " + b['name'] + "! I found you on Bizworld. I want to order / enquire.")
         feat = "<span class='badge featured'>⭐ Featured</span> " if b.get('featured') else ""
         is_new = time.time() - b.get('updated',0) < 7*24*3600 and b.get('updated',0) > 0
         new_badge = "<span class='badge newstock'>🆕 NEW STOCK!</span> " if is_new else ""
         images = b.get('images', [])
         if images:
-            main = f"<img id='main-{idx}' src='{images[0]}'>"
-            thumbs = ""
+            main_img = "<img id='main-" + str(idx) + "' src='" + images[0] + "'>"
+            thumbs_html = ""
             if len(images) > 1:
-                thumbs = "<div class='thumbs'>" + "".join([f"<img src='{im}' class='{'active' if i==0 else ''}' onclick=\"swap({idx}, '{im}', this)\">" for i, im in enumerate(images)]) + "</div>"
-            card_top = f"<div class='card-img'>{main}</div>{thumbs}"
+                thumbs_html = build_thumbs(idx, images)
+            card_top = "<div class='card-img'>" + main_img + "</div>" + thumbs_html
         else:
-            card_top = f"<div class='card-img'>{EMOJI.get(b['category'],'🏪')}</div>"
-        video_btn = f"<a class='vid' href='{b.get('video','')}' target='_blank'>▶️ Watch Video</a>" if b.get('video') else ""
-        delbtn = f"<a class='del' href='/delete/{idx}'>×</a>" if admin else ""
-        photo_count = f" 📸 {len(images)} photos" if len(images)>1 else ""
-        cards += f"""<div class='card'>{delbtn}{card_top}<div class='card-body'>{feat}{new_badge}<span class='badge'>{b['category']}</span> <span class='badge badge-city'>📍 {b.get('city','Lilongwe')}</span><h3>{b['name']}</h3><p>{b['desc']}</p><p>📍 {b['location']}<br><span class='price'>{b['price']}</span><small>{photo_count}</small></p>{video_btn}<a class='wa' href='https://wa.me/{b['phone']}?text={wa_text}' target='_blank'>💬 Order on WhatsApp</a><a class='update' href='/edit/{idx}'>🔄 Update Stock / Edit</a></div></div>"""
+            card_top = "<div class='card-img'>" + EMOJI.get(b['category'],'🏪') + "</div>"
+        video_btn = ""
+        if b.get('video'):
+            video_btn = "<a class='vid' href='" + b.get('video','') + "' target='_blank'>▶️ Watch Video</a>"
+        delbtn = ""
+        if admin:
+            delbtn = "<a class='del' href='/delete/" + str(idx) + "'>×</a>"
+        photo_count = ""
+        if len(images) > 1:
+            photo_count = " 📸 " + str(len(images)) + " photos"
+        cards += "<div class='card'>" + delbtn + card_top + "<div class='card-body'>" + feat + new_badge + "<span class='badge'>" + b['category'] + "</span> <span class='badge badge-city'>📍 " + b.get('city','Lilongwe') + "</span><h3>" + b['name'] + "</h3><p>" + b['desc'] + "</p><p>📍 " + b['location'] + "<br><span class='price'>" + b['price'] + "</span><small>" + photo_count + "</small></p>" + video_btn + "<a class='wa' href='https://wa.me/" + b['phone'] + "?text=" + wa_text + "' target='_blank'>💬 Order on WhatsApp</a><a class='update' href='/edit/" + str(idx) + "'>🔄 Update Stock / Edit</a></div></div>"
     if not cards: cards="<p style='grid-column:1/-1; text-align:center;'>No businesses found in this city. Try another city.</p>"
-    cat_links="".join([f"<a class='{'active' if c==cat else ''}' href='/?cat={c}&city={city}'>{c}</a>" for c in CATEGORIES])
-    city_links="".join([f"<a class='{'city-active' if c==city else ''}' href='/?city={c}&cat={cat}'>📍 {c}</a>" for c in CITIES])
-    return render_template_string(STYLE+f"""
-    <header><h1>🌍 Bizworld</h1><p>Find the best businesses in Malawi. Order on WhatsApp.</p><a href='/add'>+ Add Your Business - FREE</a>
+    cat_links=""
+    for c in CATEGORIES:
+        active = "active" if c==cat else ""
+        cat_links += "<a class='" + active + "' href='/?cat=" + c + "&city=" + city + "'>" + c + "</a>"
+    city_links=""
+    for c in CITIES:
+        active = "city-active" if c==city else ""
+        city_links += "<a class='" + active + "' href='/?city=" + c + "&cat=" + cat + "'>📍 " + c + "</a>"
+    qval = request.args.get('q','')
+    city_opts=""
+    for c in CITIES:
+        if c != 'All':
+            sel = "selected" if c==city else ""
+            city_opts += "<option " + sel + ">" + c + "</option>"
+    cat_opts=""
+    for c in CATEGORIES:
+        if c != 'All':
+            sel = "selected" if c==cat else ""
+            cat_opts += "<option " + sel + ">" + c + "</option>"
+    return render_template_string(STYLE + "<header><h1>🌍 Bizworld</h1><p>Find the best businesses in Malawi. Order on WhatsApp.</p><a href='/add'>+ Add Your Business - FREE</a><a class='gold' href='/featured'>⭐ Promote My Business</a><br><a class='install' href='#' onclick='installApp(); return false;'>📱 Install Bizworld App</a></header><div id='installBanner' class='install-banner'>📱 Install Bizworld App on your phone for faster shopping! <button onclick='installApp()'>Install Now</button></div><form class='search' method='get' action='/'><input name='q' placeholder='Search e.g. food, salon, phone repair...' value='" + qval + "'><select name='city'><option>All</option>" + city_opts + "</select><select name='cat'><option>All</option>" + cat_opts + "</select><button>Search</button></form><div class='cats'>" + city_links + "</div><div class='cats'>" + cat_links + "</div><div class='grid'>" + cards + "</div><footer>Bizworld • Malawi 🇲🇼 • Lilongwe | Blantyre | Mzuzu | Zomba • <a href='/?admin=1'>Admin</a></footer>")
+
+def process_images(req):
+    images = []
+    files = req.files.getlist('photos')
+    for file in files[:4]:
+        if file and file.filename != "":
+            data = file.read()
+            if len(data) < 1500000:
+                mime = file.mimetype or "image/jpeg"
+                b64 = base64.b64encode(data).decode('utf-8')
+                images.append("data:" + mime + ";base64," + b64)
+    link = req.form.get('image','').strip()
+    if not images and link:
+        images = [link]
+    return images
+
+@app.route('/add', methods=['GET','POST'])
+def add():
+    if request.method=='POST':
+        images = process_images(request)
+        phone_clean = request.form.get('phone').replace('+','').replace(' ','')
+        BUSINESSES.insert(0, {"name": request.form.get('name'), "category": request.form.get('category'), "city": request.form.get('city'), "desc": request.form.get('desc'), "price": request.form.get('price'), "phone": phone_clean, "location": request.form.get('location'), "featured": False, "images": images, "video": request.form.get('video','').strip(), "updated": time.time()})
+        save(BUSINESSES); return redirect(url_for('home'))
+    return render_template_string(STYLE + """
+    <header><h1>+ Add Your Business</h1><p>Join Bizworld Malawi - get customers on WhatsApp</p></header>
+    <form class='form' method='post' enctype='multipart/form-data'>
+    <input name='name' placeholder='Business Name' required>
+    <select name='city'><option>Lilongwe</option><option>Blantyre</option><option>Mzuzu</option><option>Zomba</option><option>Mzimba</option><option>Other</option></select>
+    <select name='category'><option>Food</option><option>Fashion</option><option>Beauty</option><option>Phones</option><option>Services</option></select>
+    <textarea name='desc' placeholder='What do you sell? e.g. Perfumes - Oud, Vanilla, Rose, Musk. From K15,000 each' required></textarea>
+    <input name='price' placeholder='Starting Price e.g. From K15,000' required>
+    <input name='phone' placeholder='WhatsApp Number e.g. 265880123456 - YOUR number' required>
+    <input name='location' placeholder='Location e.g. Chileka, Blantyre' required>
+    <label>📸 Photos - UP TO 4 PHOTOS</label>
+    <input type='file' name='photos' accept='image/*' multiple>
+    <small>Tip: 1 Business can have MANY cards! Add each new perfume as its OWN card to sell more.</small>
+    <label>🎥 Video Link (optional)</label>
+    <input name='video' placeholder='Paste TikTok / YouTube link'>
+    <input name='image' placeholder='OR paste 1 Photo Link (optional)'>
+    <button>Publish My Business →</button></form><p style='text-align:center;'><a href='/'>← Back to Home</a></p>""")
+
+@app.route('/edit/<int:idx>', methods=['GET','POST'])
+def edit(idx):
+    if idx >= len(BUSINESSES): return redirect('/')
+    b = BUSINESSES[idx]
+    if request.method=='POST':
+        entered = request.form.get('verify_phone','').replace('+','').replace(' ','')
+        if entered != b['phone'] and request.form.get('pin','') != ADMIN_PIN:
+            return "<h2 style='text-align:center;'>❌ Wrong WhatsApp number. Only the owner can edit this.<br><a href='/'>Back</a></h2>"
+        b['name'] = request.form.get('name')
+        b['category'] = request.form.get('category')
+        b['city'] = request.form.get('city')
+        b['desc'] = request.form.get('desc')
+        b['price'] = request.form.get('price')
+        b['location'] = request.form.get('location')
+        b['video'] = request.form.get('video','').strip()
+        new_images = process_images(request)
+        if new_images:
+            b['images'] = new_images
+        b['updated'] = time.time()
+        save(BUSINESSES); return redirect(url_for('home'))
+    sel_city = {}
+    for c in ["Lilongwe","Blantyre","Mzuzu","Zomba","Mzimba"]:
+        sel_city[c] = "selected" if b.get('city')==c else ""
+    sel_cat = {}
+    for c in ["Food","Fashion","Beauty","Phones","Services"]:
+        sel_cat[c] = "selected" if b['category']==c else ""
+    html = STYLE + "<header><h1>🔄 Update Stock - " + b['name'] + "</h1><p>Got new stock? Update here - your card will show 🆕 NEW STOCK and move to top!</p></header>"
+    html += "<form class='form' method='post' enctype='multipart/form-data'>"
+    html += "<label>Verify - Enter YOUR WhatsApp number (same as when you registered)</label>"
+    html += "<input name='verify_phone' placeholder='e.g. " + b['phone'] + "' required>"
+    html += "<small>OR enter Admin PIN if you are the owner of Bizworld.</small>"
+    html += "<input name='pin' type='password' placeholder='Admin PIN (owner only, optional)'>"
+    html += "<label>Business Name</label><input name='name' value='" + b['name'] + "' required>"
+    html += "<label>City</label><select name='city'><option " + sel_city["Lilongwe"] + ">Lilongwe</option><option " + sel_city["Blantyre"] + ">Blantyre</option><option " + sel_city["Mzuzu"] + ">Mzuzu</option><option " + sel_city["Zomba"] + ">Zomba</option><option " + sel_city["Mzimba"] + ">Mzimba</option><option>Other</option></select>"
+    html += "<label>Category</label><select name='category'><option " + sel_cat["Food"] + ">Food</option><option " + sel_cat["Fashion"] + ">Fashion</option><option " + sel_cat["Beauty"] + ">Beauty</option><option " + sel_cat["Phones"] + ">Phones</option><option " + sel_cat["Services"] + ">Services</option></select>"
+    html += "<label>What do you sell NOW? - Write your NEW stock here</label><textarea name='desc' required>" + b['desc'] + "</textarea>"
+    html += "<label>Price</label><input name='price' value='" + b['price'] + "' required>"
+    html += "<label>Location</label><input name='location' value='" + b['location'] + "' required>"
+    html += "<label>📸 NEW Photos - Upload new s
