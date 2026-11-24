@@ -35,29 +35,56 @@ def save(d):
 BUSINESSES = load()
 CATEGORIES = ["All", "Food", "Fashion", "Beauty", "Phones", "Services"]
 CITIES = ["All", "Lilongwe", "Blantyre", "Mzuzu", "Zomba", "Mzimba"]
-EMOJI = {"Food": "FOOD", "Fashion": "FASHION", "Beauty": "BEAUTY", "Phones": "PHONE", "Services": "SERVICE"}
+EMOJI = {"Food": "🍲", "Fashion": "👗", "Beauty": "💅", "Phones": "📱", "Services": "🧹"}
 
 BASE = """
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#7c3aed">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{margin:0;background:#f6f7fb;font-family:Arial}
-header{background:#0f172a;color:white;padding:28px 16px;text-align:center}
-header a{background:#22c55e;color:white;padding:11px 18px;border-radius:999px;text-decoration:none;font-weight:700;display:inline-block;margin:4px}
-header a.gold{background:#f59e0b;color:#111}
-header a.install{background:white;color:#0f172a;border:2px solid #22c55e}
-.grid{max-width:900px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.06)}
-.card-img{height:220px;background:#e0e7ff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+*{box-sizing:border-box}
+body{margin:0;background:#f8f7ff;font-family:Arial;color:#111;padding-bottom:80px}
+header{background:linear-gradient(135deg,#7c3aed,#db2777);color:white;padding:26px 16px 32px;text-align:center;border-radius:0 0 28px 28px}
+header h1{margin:0;font-size:34px;letter-spacing:-1px}
+header p{opacity:.9;margin:8px 0 16px;font-size:14px}
+.topbtn{display:inline-block;background:white;color:#7c3aed;padding:11px 18px;border-radius:999px;text-decoration:none;font-weight:800;font-size:14px;margin:3px}
+.topbtn.gold{background:#facc15;color:#111}
+.topbtn.install{background:transparent;color:white;border:2px solid white}
+.searchbar{max-width:900px;margin:-14px auto 0;background:white;padding:10px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.12);display:flex;gap:8px;margin-left:12px;margin-right:12px}
+.searchbar input{flex:1;border:none;outline:none;padding:10px;font-size:15px}
+.searchbar button{background:#7c3aed;color:white;border:none;padding:10px 16px;border-radius:12px;font-weight:800}
+.pills{max-width:900px;margin:14px auto 0;padding:0 12px;display:flex;gap:8px;overflow-x:auto;white-space:nowrap}
+.pills a{background:white;padding:9px 16px;border-radius:999px;text-decoration:none;color:#333;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.pills a.on{background:#111;color:white}
+.pills a.cityon{background:#16a34a;color:white}
+.section{max-width:900px;margin:18px auto 0;padding:0 12px;display:flex;justify-content:space-between;align-items:center}
+.section h2{margin:0;font-size:18px}
+.section span{color:#7c3aed;font-size:13px;font-weight:800}
+.grid{max-width:900px;margin:10px auto;padding:0 12px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.grid{grid-template-columns:1fr 1fr;gap:10px}}
+.card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.07);position:relative}
+.card-img{height:160px;background:linear-gradient(135deg,#ddd6fe,#fbcfe8);display:flex;align-items:center;justify-content:center;font-size:64px;overflow:hidden;position:relative}
 .card-img img{width:100%;height:100%;object-fit:cover}
-.thumbs{display:flex;gap:6px;padding:8px}
-.thumbs img{width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer}
-.card-body{padding:16px}
-.wa{display:block;text-align:center;background:#22c55e;color:white;padding:12px;border-radius:10px;text-decoration:none;font-weight:800;margin-top:12px}
-.update{display:block;text-align:center;background:white;color:#111;border:1px solid #ddd;padding:10px;border-radius:10px;text-decoration:none;margin-top:8px}
-.form{max-width:600px;margin:20px auto;background:white;padding:20px;border-radius:16px}
-.form input,.form select,.form textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:10px}
-.form button{width:100%;padding:14px;background:#0f172a;color:white;border:none;border-radius:10px;font-weight:800}
+.card-img .tag{position:absolute;top:8px;left:8px;background:#facc15;color:#111;font-size:11px;font-weight:800;padding:5px 9px;border-radius:999px}
+.card-img .new{position:absolute;top:8px;right:8px;background:#22c55e;color:white;font-size:11px;font-weight:800;padding:5px 9px;border-radius:999px}
+.thumbs{display:flex;gap:5px;padding:8px 8px 0}
+.thumbs img{width:42px;height:42px;object-fit:cover;border-radius:10px;border:2px solid #eee}
+.card-body{padding:12px}
+.card-body .cat{font-size:11px;color:#7c3aed;font-weight:800;text-transform:uppercase}
+.card-body h3{margin:4px 0;font-size:15px;line-height:1.2}
+.card-body p{margin:4px 0;color:#666;font-size:12px;line-height:1.4}
+.price{color:#16a34a;font-weight:900;font-size:15px}
+.loc{color:#888;font-size:11px}
+.wa{display:flex;align-items:center;justify-content:center;gap:6px;background:#22c55e;color:white;padding:11px;border-radius:12px;text-decoration:none;font-weight:800;font-size:13px;margin-top:10px}
+.update{display:block;text-align:center;color:#555;font-size:12px;margin-top:8px;text-decoration:none}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 0 16px;border-top:1px solid #eee;z-index:99}
+.bottom a{text-decoration:none;color:#888;font-size:12px;text-align:center;font-weight:700}
+.bottom a.on{color:#7c3aed}
+.form{max-width:600px;margin:20px auto;background:white;padding:20px;border-radius:20px}
+.form input,.form select,.form textarea{width:100%;padding:13px;margin:8px 0;border:1px solid #ddd;border-radius:12px;font-size:15px}
+.form button{width:100%;padding:15px;background:#7c3aed;color:white;border:none;border-radius:12px;font-weight:800;font-size:16px}
+.plan{background:white;border-radius:20px;padding:20px;margin:12px 0;border:2px solid #eee}
+.plan.hot{border-color:#f59e0b;background:#fffbeb}
 </style>
 <script>
 if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js");}
@@ -70,14 +97,14 @@ function installApp(){
 function swapThumb(el){
  var card=el.closest(".card");
  var main=card.querySelector(".card-img img");
- main.src=el.getAttribute("data-src");
+ if(main){main.src=el.getAttribute("data-src");}
 }
 </script>
 """
 
 @app.route("/manifest.json")
 def manifest():
-    return {"name": "Bizworld Malawi", "short_name": "Bizworld", "display": "standalone", "start_url": "/", "background_color": "#0f172a", "theme_color": "#0f172a", "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/744/744465.png", "sizes": "512x512", "type": "image/png"}]}
+    return {"name": "Bizworld Malawi", "short_name": "Bizworld", "display": "standalone", "start_url": "/", "background_color": "#7c3aed", "theme_color": "#7c3aed", "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/744/744465.png", "sizes": "512x512", "type": "image/png"}]}
 
 @app.route("/sw.js")
 def sw():
@@ -96,20 +123,26 @@ def home():
     if city != "All":
         filt = [b for b in filt if b.get("city", "Lilongwe") == city]
     if q:
-        filt = [b for b in filt if q in b["name"].lower() or q in b["desc"].lower()]
+        filt = [b for b in filt if q in b["name"].lower() or q in b["desc"].lower() or q in b["location"].lower()]
+    # Featured first, then NEW first
+    filt = sorted(filt, key=lambda b: (not b.get("featured", False)))
     cards = ""
     for b in filt:
         real_idx = BUSINESSES.index(b)
         wa = quote("Hi " + b["name"] + "! I found you on Bizworld.")
-        feat = "FEATURED " if b.get("featured") else ""
+        tag = ""
+        if b.get("featured"):
+            tag = "<span class='tag'>⭐ FEATURED</span>"
         is_new = False
         if b.get("updated", 0) > 0:
             if time.time() - b.get("updated", 0) < 7*24*3600:
                 is_new = True
-        new = "NEW STOCK! " if is_new else ""
+        newb = ""
+        if is_new:
+            newb = "<span class='new'>🆕 NEW</span>"
         imgs = b.get("images", [])
         if imgs:
-            top = "<div class='card-img'><img src='" + imgs[0] + "'></div>"
+            top = "<div class='card-img'>" + tag + newb + "<img src='" + imgs[0] + "'></div>"
             if len(imgs) > 1:
                 th = "<div class='thumbs'>"
                 for im in imgs:
@@ -117,25 +150,53 @@ def home():
                 th += "</div>"
                 top = top + th
         else:
-            top = "<div class='card-img'>" + EMOJI.get(b["category"], "SHOP") + "</div>"
+            emoji = EMOJI.get(b["category"], "🏪")
+            top = "<div class='card-img'>" + tag + newb + "<span>" + emoji + "</span></div>"
         delbtn = ""
         if admin:
             delbtn = "<a href='/delete/" + str(real_idx) + "'>Delete</a> "
         one = "<div class='card'>"
         one += delbtn + top
-        one += "<div class='card-body'><b>" + feat + new + b["name"] + "</b>"
+        one += "<div class='card-body'>"
+        one += "<div class='cat'>" + b["category"] + " • " + b.get("city", "Lilongwe") + "</div>"
+        one += "<h3>" + b["name"] + "</h3>"
         one += "<p>" + b["desc"] + "</p>"
-        one += "<p>" + b["location"] + " - " + b["price"] + "</p>"
-        one += "<a class='wa' href='https://wa.me/" + b["phone"] + "?text=" + wa + "'>Order on WhatsApp</a>"
-        one += "<a class='update' href='/edit/" + str(real_idx) + "'>Update Stock / Edit</a>"
+        one += "<p class='loc'>📍 " + b["location"] + "</p>"
+        one += "<div class='price'>" + b["price"] + "</div>"
+        one += "<a class='wa' href='https://wa.me/" + b["phone"] + "?text=" + wa + "'>💬 Order on WhatsApp</a>"
+        one += "<a class='update' href='/edit/" + str(real_idx) + "'>🔄 Update Stock</a>"
         one += "</div></div>"
         cards += one
+    if not cards:
+        cards = "<p style='text-align:center;grid-column:1/-1;'>No businesses found. Try another city.</p>"
+    city_pills = ""
+    for c in CITIES:
+        cls = "cityon" if c == city else ""
+        city_pills += "<a class='" + cls + "' href='/?city=" + c + "&cat=" + cat + "'>📍 " + c + "</a>"
+    cat_pills = ""
+    for c in CATEGORIES:
+        cls = "on" if c == cat else ""
+        cat_pills += "<a class='" + cls + "' href='/?cat=" + c + "&city=" + city + "'>" + c + "</a>"
+    qval = request.args.get("q", "")
     page = BASE
-    page += "<header><h1>Bizworld</h1><p>Find businesses in Malawi. Order on WhatsApp.</p>"
-    page += "<a href='/add'>Add Your Business - FREE</a>"
-    page += "<a class='gold' href='/featured'>Promote My Business</a><br>"
-    page += "<a class='install' href='#' onclick='installApp();return false;'>Install Bizworld App</a></header>"
+    page += "<header><h1>🌍 Bizworld</h1>"
+    page += "<p>Find the best businesses in Malawi 🇲🇼 Order on WhatsApp</p>"
+    page += "<a class='topbtn' href='/add'>+ Add Business FREE</a>"
+    page += "<a class='topbtn gold' href='/featured'>⭐ Promote</a><br>"
+    page += "<a class='topbtn install' href='#' onclick='installApp();return false;'>📱 Install App</a></header>"
+    page += "<form class='searchbar' method='get' action='/'>"
+    page += "<input name='q' placeholder='🔍 Search perfumes, food, salon...' value='" + qval + "'>"
+    page += "<button>Search</button></form>"
+    page += "<div class='pills'>" + city_pills + "</div>"
+    page += "<div class='pills'>" + cat_pills + "</div>"
+    page += "<div class='section'><h2>🔥 Trending Near You</h2><span>See All →</span></div>"
     page += "<div class='grid'>" + cards + "</div>"
+    page += "<div class='bottom'>"
+    page += "<a class='on' href='/'>🏠<br>Home</a>"
+    page += "<a href='/?cat=Beauty&city=" + city + "'>💅<br>Beauty</a>"
+    page += "<a href='/add'>➕<br>Sell</a>"
+    page += "<a href='/featured'>⭐<br>Promote</a>"
+    page += "</div>"
     return render_template_string(page)
 
 def process_images(req):
@@ -167,18 +228,18 @@ def add():
         save(BUSINESSES)
         return redirect(url_for("home"))
     page = BASE
-    page += "<header><h1>Add Your Business</h1></header>"
+    page += "<header><h1>+ Add Business</h1><p>Join Bizworld - Get customers on WhatsApp</p></header>"
     page += "<form class='form' method='post' enctype='multipart/form-data'>"
     page += "<input name='name' placeholder='Business Name' required>"
     page += "<select name='city'><option>Lilongwe</option><option>Blantyre</option><option>Mzuzu</option><option>Zomba</option></select>"
     page += "<select name='category'><option>Food</option><option>Fashion</option><option>Beauty</option><option>Phones</option><option>Services</option></select>"
     page += "<textarea name='desc' placeholder='What do you sell?' required></textarea>"
-    page += "<input name='price' placeholder='Price' required>"
+    page += "<input name='price' placeholder='Price e.g. From K15,000' required>"
     page += "<input name='phone' placeholder='WhatsApp 265...' required>"
     page += "<input name='location' placeholder='Location' required>"
-    page += "<label>Photos up to 4</label><input type='file' name='photos' accept='image/*' multiple>"
-    page += "<input name='video' placeholder='TikTok link'>"
-    page += "<button>Publish</button></form>"
+    page += "<label>📸 Photos up to 4</label><input type='file' name='photos' accept='image/*' multiple>"
+    page += "<input name='video' placeholder='TikTok / YouTube link'>"
+    page += "<button>Publish My Business →</button></form>"
     return render_template_string(page)
 
 @app.route("/edit/<int:idx>", methods=["GET", "POST"])
@@ -201,7 +262,7 @@ def edit(idx):
         save(BUSINESSES)
         return redirect(url_for("home"))
     page = BASE
-    page += "<header><h1>Update Stock</h1><p>" + b["name"] + "</p></header>"
+    page += "<header><h1>🔄 Update Stock</h1><p>" + b["name"] + "</p></header>"
     page += "<form class='form' method='post' enctype='multipart/form-data'>"
     page += "<input name='verify_phone' placeholder='Your WhatsApp number' required>"
     page += "<input name='pin' type='password' placeholder='Admin PIN optional'>"
@@ -209,17 +270,19 @@ def edit(idx):
     page += "<textarea name='desc' required>" + b["desc"] + "</textarea>"
     page += "<input name='price' value='" + b["price"] + "' required>"
     page += "<input name='location' value='" + b["location"] + "' required>"
-    page += "<input type='file' name='photos' accept='image/*' multiple>"
-    page += "<button>Update My Stock</button></form>"
+    page += "<label>📸 New Photos</label><input type='file' name='photos' accept='image/*' multiple>"
+    page += "<button>✅ Update My Stock - Show as NEW!</button></form>"
     return render_template_string(page)
 
 @app.route("/featured")
 def featured():
     wa = quote("Hi Bizworld! I want FEATURED")
     page = BASE
-    page += "<header><h1>Promote Your Business</h1></header>"
-    page += "<div class='form'><h3>Featured 1 Week K5,000</h3><h3>Featured 1 Month K15,000</h3>"
-    page += "<a class='wa' href='https://wa.me/" + OWNER_PHONE + "?text=" + wa + "'>Pay via WhatsApp</a></div>"
+    page += "<header><h1>⭐ Promote Your Business</h1><p>Be at the top. Get more customers.</p></header>"
+    page += "<div class='form'><h3>⭐ Featured 1 Week - K5,000</h3><p>Yellow badge + Top of homepage</p>"
+    page += "<h3>🔥 Featured 1 Month - K15,000</h3><p>Best value - Full month at top</p>"
+    page += "<h3>👑 Top Spot 1 Month - K25,000</h3><p>Very first card</p>"
+    page += "<a class='wa' href='https://wa.me/" + OWNER_PHONE + "?text=" + wa + "'>Pay via WhatsApp →</a></div>"
     return render_template_string(page)
 
 @app.route("/delete/<int:idx>", methods=["GET", "POST"])
