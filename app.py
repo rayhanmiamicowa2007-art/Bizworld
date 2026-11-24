@@ -1,19 +1,19 @@
 from flask import Flask, request, redirect, url_for, render_template_string
 from urllib.parse import quote
-import json, os
+import json, os, base64, time
 
 app = Flask(__name__)
 DATA_FILE = "businesses.json"
-ADMIN_PIN = "1995"  # CHANGE to your PIN
-OWNER_PHONE = "265986765421" # CHANGE to YOUR WhatsApp
+ADMIN_PIN = "1234"
+OWNER_PHONE = "265880123456"
 
 DEFAULT = [
-    {"name": "Lilongwe Fresh Foods", "category": "Food", "city": "Lilongwe", "desc": "Fresh vegetables, fruits & groceries delivered in Area 47.", "price": "From K2,000", "phone": "265880123456", "location": "Area 47, Lilongwe", "featured": True, "image": ""},
-    {"name": "Glow Beauty Salon", "category": "Beauty", "city": "Lilongwe", "desc": "Braiding, nails, makeup & wigs. Walk-ins welcome.", "price": "From K5,000", "phone": "265991234567", "location": "Old Town, Lilongwe", "featured": True, "image": ""},
-    {"name": "TechFix Malawi", "category": "Phones", "city": "Lilongwe", "desc": "Phone repair, screens, batteries & accessories in 30 mins.", "price": "From K10,000", "phone": "265882345678", "location": "City Centre, Lilongwe", "featured": False, "image": ""},
-    {"name": "Urban Styles Boutique", "category": "Fashion", "city": "Blantyre", "desc": "Latest fashion, shoes & bags for men & women.", "price": "From K15,000", "phone": "265993456789", "location": "Chichiri, Blantyre", "featured": False, "image": ""},
-    {"name": "HomeClean Services", "category": "Services", "city": "Blantyre", "desc": "House cleaning, laundry & fumigation. Book same day.", "price": "From K20,000", "phone": "265884567890", "location": "All Blantyre", "featured": False, "image": ""},
-    {"name": "Mama's Kitchen", "category": "Food", "city": "Lilongwe", "desc": "Nsima, Chambo, Beef & local dishes. Lunch delivery.", "price": "From K4,500", "phone": "265995678901", "location": "Area 18, Lilongwe", "featured": False, "image": ""},
+    {"name": "Lilongwe Fresh Foods", "category": "Food", "city": "Lilongwe", "desc": "Fresh vegetables, fruits & groceries delivered in Area 47.", "price": "From K2,000", "phone": "265880123456", "location": "Area 47, Lilongwe", "featured": True, "images": [], "video": "", "updated": 0},
+    {"name": "Glow Beauty Salon", "category": "Beauty", "city": "Lilongwe", "desc": "Braiding, nails, makeup & wigs. Walk-ins welcome.", "price": "From K5,000", "phone": "265991234567", "location": "Old Town, Lilongwe", "featured": True, "images": [], "video": "", "updated": 0},
+    {"name": "TechFix Malawi", "category": "Phones", "city": "Lilongwe", "desc": "Phone repair, screens, batteries & accessories in 30 mins.", "price": "From K10,000", "phone": "265882345678", "location": "City Centre, Lilongwe", "featured": False, "images": [], "video": "", "updated": 0},
+    {"name": "Urban Styles Boutique", "category": "Fashion", "city": "Blantyre", "desc": "Latest fashion, shoes & bags for men & women.", "price": "From K15,000", "phone": "265993456789", "location": "Chichiri, Blantyre", "featured": False, "images": [], "video": "", "updated": 0},
+    {"name": "HomeClean Services", "category": "Services", "city": "Blantyre", "desc": "House cleaning, laundry & fumigation. Book same day.", "price": "From K20,000", "phone": "265884567890", "location": "All Blantyre", "featured": False, "images": [], "video": "", "updated": 0},
+    {"name": "Mama's Kitchen", "category": "Food", "city": "Lilongwe", "desc": "Nsima, Chambo, Beef & local dishes. Lunch delivery.", "price": "From K4,500", "phone": "265995678901", "location": "Area 18, Lilongwe", "featured": False, "images": [], "video": "", "updated": 0},
 ]
 
 def load():
@@ -21,9 +21,13 @@ def load():
         try:
             with open(DATA_FILE) as f:
                 data = json.load(f)
-                # Add city to old businesses that don't have it
                 for b in data:
                     if "city" not in b: b["city"] = "Lilongwe"
+                    if "video" not in b: b["video"] = ""
+                    if "updated" not in b: b["updated"] = 0
+                    if "images" not in b:
+                        old = b.get("image","")
+                        b["images"] = [old] if old else []
                 return data
         except: return DEFAULT.copy()
     return DEFAULT.copy()
@@ -54,16 +58,22 @@ header a.gold {background:#f59e0b; color:#111;}
 .grid {max-width:900px; margin:0 auto; padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 @media(max-width:600px){.grid{grid-template-columns:1fr;}}
 .card {background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,.06); position:relative;}
-.card-img {height:160px; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:60px; overflow:hidden;}
+.card-img {height:220px; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:60px; overflow:hidden;}
 .card-img img {width:100%; height:100%; object-fit:cover;}
+.thumbs {display:flex; gap:6px; padding:8px 8px 0;}
+.thumbs img {width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border:2px solid #eee;}
+.thumbs img.active {border-color:#22c55e;}
 .card-body {padding:16px;}
 .badge {display:inline-block; background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700;}
 .badge-city {background:#dcfce7; color:#166534;}
 .featured {background:#fef3c7; color:#92400e;}
+.newstock {background:#dcfce7; color:#166534; border:1px solid #22c55e;}
 .card h3 {margin:10px 0 6px;} .card p {color:#555; font-size:14px; line-height:1.5;}
 .price {font-weight:800; color:#16a34a;}
 .wa {display:block; text-align:center; background:#22c55e; color:white; padding:12px; border-radius:10px; text-decoration:none; font-weight:800; margin-top:12px;}
-.del {position:absolute; top:8px; right:8px; background:#ef4444; color:white; border-radius:50%; width:28px; height:28px; text-align:center; line-height:28px; text-decoration:none; font-weight:800;}
+.vid {display:block; text-align:center; background:#111; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-top:8px;}
+.update {display:block; text-align:center; background:white; color:#0f172a; border:1px solid #ddd; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-top:8px;}
+.del {position:absolute; top:8px; right:8px; background:#ef4444; color:white; border-radius:50%; width:28px; height:28px; text-align:center; line-height:28px; text-decoration:none; font-weight:800; z-index:5;}
 footer {text-align:center; padding:24px; color:#777; font-size:13px;}
 .form {max-width:600px; margin:20px auto; background:white; padding:20px; border-radius:16px;}
 .form input, .form select, .form textarea {width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:10px;}
@@ -71,7 +81,16 @@ footer {text-align:center; padding:24px; color:#777; font-size:13px;}
 .plan {background:white; border-radius:16px; padding:20px; margin:12px 0; border:2px solid #eee;}
 .plan.hot {border-color:#f59e0b; background:#fffbeb;}
 small {color:#888;}
+label {font-weight:700; font-size:13px;}
 </style>
+<script>
+function swap(cardId, src, el){
+  document.getElementById('main-'+cardId).src = src;
+  var thumbs = el.parentElement.querySelectorAll('img');
+  thumbs.forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
 """
 
 @app.route('/')
@@ -85,14 +104,27 @@ def home():
     if city != 'All': filtered = [b for b in filtered if b.get('city','Lilongwe')==city]
     if q: filtered = [b for b in filtered if q in b['name'].lower() or q in b['desc'].lower() or q in b['location'].lower() or q in b['category'].lower() or q in b.get('city','').lower()]
     indexed = [(BUSINESSES.index(b), b) for b in filtered]
-    indexed = sorted(indexed, key=lambda x: not x[1].get('featured', False))
+    # Sort: Featured first, then New Stock (updated in last 7 days), then rest
+    indexed = sorted(indexed, key=lambda x: (not x[1].get('featured', False), not (time.time() - x[1].get('updated',0) < 7*24*3600)))
     cards=""
     for idx, b in indexed:
         wa_text = quote(f"Hi {b['name']}! I found you on Bizworld. I want to order / enquire.")
         feat = "<span class='badge featured'>⭐ Featured</span> " if b.get('featured') else ""
-        img = f"<img src='{b.get('image','')}'>" if b.get('image') else EMOJI.get(b['category'],'🏪')
+        is_new = time.time() - b.get('updated',0) < 7*24*3600 and b.get('updated',0) > 0
+        new_badge = "<span class='badge newstock'>🆕 NEW STOCK!</span> " if is_new else ""
+        images = b.get('images', [])
+        if images:
+            main = f"<img id='main-{idx}' src='{images[0]}'>"
+            thumbs = ""
+            if len(images) > 1:
+                thumbs = "<div class='thumbs'>" + "".join([f"<img src='{im}' class='{'active' if i==0 else ''}' onclick=\"swap({idx}, '{im}', this)\">" for i, im in enumerate(images)]) + "</div>"
+            card_top = f"<div class='card-img'>{main}</div>{thumbs}"
+        else:
+            card_top = f"<div class='card-img'>{EMOJI.get(b['category'],'🏪')}</div>"
+        video_btn = f"<a class='vid' href='{b.get('video','')}' target='_blank'>▶️ Watch Video</a>" if b.get('video') else ""
         delbtn = f"<a class='del' href='/delete/{idx}'>×</a>" if admin else ""
-        cards += f"""<div class='card'>{delbtn}<div class='card-img'>{img}</div><div class='card-body'>{feat}<span class='badge'>{b['category']}</span> <span class='badge badge-city'>📍 {b.get('city','Lilongwe')}</span><h3>{b['name']}</h3><p>{b['desc']}</p><p>📍 {b['location']}<br><span class='price'>{b['price']}</span></p><a class='wa' href='https://wa.me/{b['phone']}?text={wa_text}' target='_blank'>💬 Order on WhatsApp</a></div></div>"""
+        photo_count = f" 📸 {len(images)} photos" if len(images)>1 else ""
+        cards += f"""<div class='card'>{delbtn}{card_top}<div class='card-body'>{feat}{new_badge}<span class='badge'>{b['category']}</span> <span class='badge badge-city'>📍 {b.get('city','Lilongwe')}</span><h3>{b['name']}</h3><p>{b['desc']}</p><p>📍 {b['location']}<br><span class='price'>{b['price']}</span><small>{photo_count}</small></p>{video_btn}<a class='wa' href='https://wa.me/{b['phone']}?text={wa_text}' target='_blank'>💬 Order on WhatsApp</a><a class='update' href='/edit/{idx}'>🔄 Update Stock / Edit</a></div></div>"""
     if not cards: cards="<p style='grid-column:1/-1; text-align:center;'>No businesses found in this city. Try another city.</p>"
     cat_links="".join([f"<a class='{'active' if c==cat else ''}' href='/?cat={c}&city={city}'>{c}</a>" for c in CATEGORIES])
     city_links="".join([f"<a class='{'city-active' if c==city else ''}' href='/?city={c}&cat={cat}'>📍 {c}</a>" for c in CITIES])
@@ -102,14 +134,85 @@ def home():
     <div class='cats'>{city_links}</div><div class='cats'>{cat_links}</div><div class='grid'>{cards}</div>
     <footer>Bizworld • Malawi 🇲🇼 • Lilongwe | Blantyre | Mzuzu | Zomba • <a href='/?admin=1'>Admin</a></footer>""")
 
+def process_images(req):
+    images = []
+    files = req.files.getlist('photos')
+    for file in files[:4]:
+        if file and file.filename != "":
+            data = file.read()
+            if len(data) < 1500000:
+                mime = file.mimetype or "image/jpeg"
+                b64 = base64.b64encode(data).decode('utf-8')
+                images.append(f"data:{mime};base64,{b64}")
+    link = req.form.get('image','').strip()
+    if not images and link:
+        images = [link]
+    return images
+
 @app.route('/add', methods=['GET','POST'])
 def add():
     if request.method=='POST':
-        BUSINESSES.insert(0, {"name": request.form.get('name'), "category": request.form.get('category'), "city": request.form.get('city'), "desc": request.form.get('desc'), "price": request.form.get('price'), "phone": request.form.get('phone').replace('+','').replace(' ',''), "location": request.form.get('location'), "featured": False, "image": request.form.get('image','').strip()})
+        images = process_images(request)
+        BUSINESSES.insert(0, {"name": request.form.get('name'), "category": request.form.get('category'), "city": request.form.get('city'), "desc": request.form.get('desc'), "price": request.form.get('price'), "phone": request.form.get('phone').replace('+','').replace(' ',''), "location": request.form.get('location'), "featured": False, "images": images, "video": request.form.get('video','').strip(), "updated": time.time()})
         save(BUSINESSES); return redirect(url_for('home'))
     return render_template_string(STYLE+"""
     <header><h1>+ Add Your Business</h1><p>Join Bizworld Malawi - get customers on WhatsApp</p></header>
-    <form class='form' method='post'><input name='name' placeholder='Business Name' required><select name='city'><option>Lilongwe</option><option>Blantyre</option><option>Mzuzu</option><option>Zomba</option><option>Mzimba</option><option>Other</option></select><select name='category'><option>Food</option><option>Fashion</option><option>Beauty</option><option>Phones</option><option>Services</option></select><textarea name='desc' placeholder='What do you sell?' required></textarea><input name='price' placeholder='Starting Price e.g. From K5,000' required><input name='phone' placeholder='WhatsApp Number e.g. 265880123456 - YOUR number, customers will message YOU' required><input name='location' placeholder='Location e.g. Chichiri, Blantyre' required><input name='image' placeholder='Photo Link (optional)'><small>Your WhatsApp number is used for the green Order button. Customers message YOU directly.</small><button>Publish My Business →</button></form><p style='text-align:center;'><a href='/'>← Back to Home</a></p>""")
+    <form class='form' method='post' enctype='multipart/form-data'>
+    <input name='name' placeholder='Business Name' required>
+    <select name='city'><option>Lilongwe</option><option>Blantyre</option><option>Mzuzu</option><option>Zomba</option><option>Mzimba</option><option>Other</option></select>
+    <select name='category'><option>Food</option><option>Fashion</option><option>Beauty</option><option>Phones</option><option>Services</option></select>
+    <textarea name='desc' placeholder='What do you sell? e.g. Perfumes - Oud, Vanilla, Rose, Musk. From K15,000 each' required></textarea>
+    <input name='price' placeholder='Starting Price e.g. From K15,000' required>
+    <input name='phone' placeholder='WhatsApp Number e.g. 265880123456 - YOUR number' required>
+    <input name='location' placeholder='Location e.g. Chileka, Blantyre' required>
+    <label>📸 Photos - UP TO 4 PHOTOS</label>
+    <input type='file' name='photos' accept='image/*' multiple>
+    <small>Tip: 1 Business can have MANY cards! Add each new perfume as its OWN card to sell more.</small>
+    <label>🎥 Video Link (optional)</label>
+    <input name='video' placeholder='Paste TikTok / YouTube link'>
+    <input name='image' placeholder='OR paste 1 Photo Link (optional)'>
+    <button>Publish My Business →</button></form><p style='text-align:center;'><a href='/'>← Back to Home</a></p>""")
+
+@app.route('/edit/<int:idx>', methods=['GET','POST'])
+def edit(idx):
+    if idx >= len(BUSINESSES): return redirect('/')
+    b = BUSINESSES[idx]
+    if request.method=='POST':
+        # Seller must enter their OWN WhatsApp number to prove it's theirs
+        entered = request.form.get('verify_phone','').replace('+','').replace(' ','')
+        if entered != b['phone'] and request.form.get('pin','') != ADMIN_PIN:
+            return "<h2 style='text-align:center;'>❌ Wrong WhatsApp number. Only the owner can edit this.<br><a href='/'>Back</a></h2>"
+        b['name'] = request.form.get('name')
+        b['category'] = request.form.get('category')
+        b['city'] = request.form.get('city')
+        b['desc'] = request.form.get('desc')
+        b['price'] = request.form.get('price')
+        b['location'] = request.form.get('location')
+        b['video'] = request.form.get('video','').strip()
+        new_images = process_images(request)
+        if new_images:
+            b['images'] = new_images
+        b['updated'] = time.time()  # This triggers 🆕 NEW STOCK badge for 7 days + moves to top
+        save(BUSINESSES); return redirect(url_for('home'))
+    return render_template_string(STYLE+f"""
+    <header><h1>🔄 Update Stock - {b['name']}</h1><p>Got new stock? Update here - your card will show 🆕 NEW STOCK and move to top!</p></header>
+    <form class='form' method='post' enctype='multipart/form-data'>
+    <label>Verify - Enter YOUR WhatsApp number (same as when you registered)</label>
+    <input name='verify_phone' placeholder='e.g. {b['phone']}' required>
+    <small>OR enter Admin PIN if you are the owner of Bizworld.</small>
+    <input name='pin' type='password' placeholder='Admin PIN (owner only, optional)'>
+    <label>Business Name</label><input name='name' value="{b['name']}" required>
+    <label>City</label><select name='city'><option {'selected' if b.get('city')=='Lilongwe' else ''}>Lilongwe</option><option {'selected' if b.get('city')=='Blantyre' else ''}>Blantyre</option><option {'selected' if b.get('city')=='Mzuzu' else ''}>Mzuzu</option><option {'selected' if b.get('city')=='Zomba' else ''}>Zomba</option><option {'selected' if b.get('city')=='Mzimba' else ''}>Mzimba</option><option>Other</option></select>
+    <label>Category</label><select name='category'><option {'selected' if b['category']=='Food' else ''}>Food</option><option {'selected' if b['category']=='Fashion' else ''}>Fashion</option><option {'selected' if b['category']=='Beauty' else ''}>Beauty</option><option {'selected' if b['category']=='Phones' else ''}>Phones</option><option {'selected' if b['category']=='Services' else ''}>Services</option></select>
+    <label>What do you sell NOW? - Write your NEW stock here</label><textarea name='desc' required>{b['desc']}</textarea>
+    <label>Price</label><input name='price' value="{b['price']}" required>
+    <label>Location</label><input name='location' value="{b['location']}" required>
+    <label>📸 NEW Photos - Upload new stock photos (replaces old photos)</label>
+    <input type='file' name='photos' accept='image/*' multiple>
+    <small>If you don't choose new photos, old photos stay.</small>
+    <label>🎥 Video Link</label><input name='video' value="{b.get('video','')}">
+    <input name='image' placeholder='OR paste Photo Link'>
+    <button>✅ Update My Stock - Show as NEW!</button></form><p style='text-align:center;'><a href='/'>← Back</a></p>""")
 
 @app.route('/featured')
 def featured():
