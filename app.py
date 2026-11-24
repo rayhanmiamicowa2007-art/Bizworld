@@ -4,8 +4,8 @@ import json, os, base64, time
 
 app = Flask(__name__)
 DATA_FILE = "businesses.json"
-ADMIN_PIN = "1234"
-OWNER_PHONE = "265880123456"
+ADMIN_PIN = "1995"
+OWNER_PHONE = "265986765421"
 
 DEFAULT = [
     {"name": "Lilongwe Fresh Foods", "category": "Food", "city": "Lilongwe", "desc": "Fresh vegetables, fruits & groceries delivered in Area 47.", "price": "From K2,000", "phone": "265880123456", "location": "Area 47, Lilongwe", "featured": True, "images": [], "video": "", "updated": 0},
