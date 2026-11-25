@@ -9,10 +9,10 @@ app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # >>> PUT YOUR OWN PASSWORD HERE <<<
-ADMIN_PASSWORD = "PUT_YOUR_OWN_PASSWORD_HERE"
+ADMIN_PASSWORD = "1995"
 
 # YOUR WHATSAPP FOR PROMOTION
-OWNER_WHATSAPP = "26598676542"
+OWNER_WHATSAPP = "265986765421"
 PROMOTION_PRICE = "MK5,000 for 7 days"
 
 ALLOWED_IMG = {"png","jpg","jpeg","webp","gif"}
@@ -20,6 +20,18 @@ ALLOWED_VIDEO = {"mp4","mov","webm","3gp"}
 
 DISTRICTS = ["Blantyre","Lilongwe","Mzuzu","Zomba","Kasungu","Mangochi","Karonga","Salima","Dedza","Other"]
 CATEGORIES = ["Salon & Cosmetics","Electronics & Phones","Food","Fashion & Clothes","Phones & Accessories","Grocery & Shops","Services","Other"]
+
+# Auto product photos - so every card has a beautiful picture
+CATEGORY_PHOTOS = {
+    "Salon & Cosmetics": "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80",
+    "Electronics & Phones": "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&q=80",
+    "Food": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
+    "Fashion & Clothes": "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80",
+    "Phones & Accessories": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80",
+    "Grocery & Shops": "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&q=80",
+    "Services": "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80",
+    "Other": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80",
+}
 
 def db():
     con = sqlite3.connect("bizworld.db")
@@ -104,7 +116,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-s
 .chips a.active{background:#000;color:#fff;border-color:#000}
 .card{background:#fff;border-radius:18px;margin:12px 16px 0;padding:0;overflow:hidden;box-shadow:0 2px 12px #0001}
 .card.promoted{border:2px solid #FFD700}
-.card-img{width:100%;height:180px;object-fit:cover;background:#eee}
+.card-img{width:100%;height:190px;object-fit:cover;background:#eee;display:block}
 .card-body{padding:14px}
 .badge{display:inline-block;background:#FFD700;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:bold;margin-bottom:8px}
 .badge-green{display:inline-block;background:#E6F7ED;color:#0A7A3A;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:bold}
@@ -172,7 +184,11 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); 
 
 {% for b in businesses %}
 <div class="card {{'promoted' if b['promoted'] else ''}}">
-{% if b['photo'] %}<img class="card-img" src="/uploads/{{b['photo']}}">{% endif %}
+{% if b['photo'] %}
+<img class="card-img" src="/uploads/{{b['photo']}}">
+{% else %}
+<img class="card-img" src="{{category_photos.get(b['category'], category_photos['Other'])}}">
+{% endif %}
 {% if b['video'] %}<video controls src="/uploads/{{b['video']}}" style="width:100%"></video>{% endif %}
 <div class="card-body">
 {% if b['promoted'] %}<span class="badge">⭐ PROMOTED • FEATURED</span> {% else %}<span class="badge-green">✓ VERIFIED BUSINESS</span>{% endif %}
@@ -239,7 +255,7 @@ def home():
     rows = con.execute(sql, params).fetchall()
     con.close()
     from flask import render_template_string as r
-    return r(HOME, businesses=rows, count=len(rows), districts=["All"]+DISTRICTS, categories=["All"]+CATEGORIES, district=district, cat=cat, q=q, pw=pw, is_admin=is_admin, owner_whatsapp=OWNER_WHATSAPP, promotion_price=PROMOTION_PRICE)
+    return r(HOME, businesses=rows, count=len(rows), category_photos=CATEGORY_PHOTOS, districts=["All"]+DISTRICTS, categories=["All"]+CATEGORIES, district=district, cat=cat, q=q, pw=pw, is_admin=is_admin, owner_whatsapp=OWNER_WHATSAPP, promotion_price=PROMOTION_PRICE)
 
 @app.route("/add", methods=["GET","POST"])
 def add():
