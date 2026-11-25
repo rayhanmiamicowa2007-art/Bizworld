@@ -9,11 +9,10 @@ app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # >>> PUT YOUR OWN PASSWORD HERE <<<
-ADMIN_PASSWORD = "Amigo"
+ADMIN_PASSWORD = "PUT_YOUR_OWN_PASSWORD_HERE"
 
-# >>> YOUR WHATSAPP FOR PROMOTION <<<
-# Your number 0986765421
-OWNER_WHATSAPP = "265986765421"
+# YOUR WHATSAPP FOR PROMOTION
+OWNER_WHATSAPP = "26598676542"
 PROMOTION_PRICE = "MK5,000 for 7 days"
 
 ALLOWED_IMG = {"png","jpg","jpeg","webp","gif"}
@@ -84,70 +83,126 @@ def save_file(file, allowed):
 
 BASE_CSS = """
 <style>
-body{font-family:Arial,sans-serif;margin:0;padding:16px;background:#f5f5f5;max-width:800px;margin:auto}
-h1{font-size:24px} .card{background:#fff;border-radius:14px;padding:16px;margin:14px 0;box-shadow:0 2px 8px #0001}
-.card.promoted{border:3px solid #FFD700;background:#FFFEF0}
-.btn{background:#25D366;color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:10px}
-.btn-black{background:#000;color:#fff;padding:11px 18px;border-radius:10px;text-decoration:none;font-weight:bold;display:inline-block}
-.btn-red{background:#ff4444;color:#fff;padding:7px 12px;border-radius:7px;text-decoration:none;font-size:13px}
-.btn-gold{background:#FFD700;color:#000;padding:7px 12px;border-radius:7px;text-decoration:none;font-size:13px}
-.filter a{display:inline-block;padding:8px 14px;margin:4px;border-radius:20px;background:#eee;color:#000;text-decoration:none;font-size:14px}
-.filter a.active{background:#000;color:#fff}
-img,video{width:100%;border-radius:10px;margin-top:10px}
-input,select,textarea{width:100%;padding:12px;margin:7px 0;border-radius:10px;border:1px solid #ccc;box-sizing:border-box;font-size:15px}
-button{width:100%;padding:14px;background:#25D366;color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:16px}
-.promo-banner{background:#FFD700;padding:14px;border-radius:12px;text-align:center;margin:12px 0}
-.promo-banner a{background:#000;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:6px}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;margin:0;padding:0;background:#F6F7F9;color:#111;padding-bottom:80px}
+.topbar{background:#000;color:#fff;padding:14px 16px 16px;position:sticky;top:0;z-index:10}
+.topbar h1{margin:0;font-size:22px;letter-spacing:-0.5px}
+.topbar h1 span{color:#FFD700}
+.topbar p{margin:4px 0 0;font-size:13px;opacity:0.8}
+.search-box{background:#fff;margin:12px 16px 0;padding:4px;border-radius:14px;display:flex;box-shadow:0 2px 10px #0001}
+.search-box input{border:none;outline:none;flex:1;padding:12px;font-size:15px;border-radius:14px}
+.search-box button{background:#000;color:#fff;border:none;padding:10px 16px;border-radius:10px;font-weight:bold}
+.promo-banner{margin:14px 16px;background:linear-gradient(135deg,#FFD700,#FFB800);padding:16px;border-radius:16px;display:flex;justify-content:space-between;align-items:center}
+.promo-banner b{font-size:15px}
+.promo-banner p{margin:4px 0 0;font-size:12px}
+.promo-banner a{background:#000;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:bold;white-space:nowrap}
+.add-btn{display:block;margin:0 16px;background:#25D366;color:#fff;text-align:center;padding:14px;border-radius:14px;text-decoration:none;font-weight:bold;font-size:15px;box-shadow:0 4px 12px #25D36644}
+.section{padding:14px 16px 0}
+.section h3{margin:0 0 10px;font-size:16px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips a{white-space:nowrap;padding:8px 14px;background:#fff;border:1px solid #eee;border-radius:20px;text-decoration:none;color:#111;font-size:13px;font-weight:600}
+.chips a.active{background:#000;color:#fff;border-color:#000}
+.card{background:#fff;border-radius:18px;margin:12px 16px 0;padding:0;overflow:hidden;box-shadow:0 2px 12px #0001}
+.card.promoted{border:2px solid #FFD700}
+.card-img{width:100%;height:180px;object-fit:cover;background:#eee}
+.card-body{padding:14px}
+.badge{display:inline-block;background:#FFD700;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:bold;margin-bottom:8px}
+.badge-green{display:inline-block;background:#E6F7ED;color:#0A7A3A;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:bold}
+.card-body h2{margin:0 0 4px;font-size:18px}
+.card-body .meta{font-size:13px;color:#666;margin:0}
+.card-body .desc{font-size:14px;line-height:1.5;color:#333;margin:10px 0 6px}
+.card-body .prod{font-size:13px;color:#111;background:#F6F7F9;padding:8px 10px;border-radius:10px}
+.actions{display:flex;gap:8px;margin-top:12px}
+.actions a{flex:1;text-align:center;padding:12px;border-radius:12px;text-decoration:none;font-weight:bold;font-size:14px}
+.btn-wa{background:#25D366;color:#fff}
+.btn-promote{background:#FFD700;color:#000}
+.admin-row{display:flex;gap:8px;margin-top:10px}
+.admin-row a{flex:1;text-align:center;padding:9px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:bold}
+.btn-red{background:#FFEAEA;color:#D00}
+.btn-gold{background:#FFF4CC;color:#000}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:10px 0 14px;z-index:20}
+.bottom-nav a{text-decoration:none;color:#666;text-align:center;font-size:11px}
+.bottom-nav a.active{color:#000;font-weight:bold}
+.bottom-nav span{font-size:20px;display:block}
+input,select,textarea{width:100%;padding:13px;margin:7px 0;border-radius:12px;border:1px solid #ddd;font-size:15px;background:#fff}
+button.submit{width:100%;padding:15px;background:#25D366;color:#fff;border:none;border-radius:14px;font-weight:bold;font-size:16px}
 </style>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bizworld">
+<link rel="apple-touch-icon" href="/icon-192.png">
 """
 
 HOME = BASE_CSS + """
-<h1>Bizworld 🇲🇼 - {{count}} Real Businesses</h1>
-<p>Find real businesses in Malawi. Chat on WhatsApp directly.</p>
-
-<div class="promo-banner">
-<b>⭐ Want your business at the TOP?</b><br>
-Promotion: {{promotion_price}}<br>
-<a href="https://wa.me/{{owner_whatsapp}}?text=Hi Bizworld, I want to PROMOTE my business. How much is promotion?" target="_blank">⭐ Promote My Business - Chat Owner</a>
+<div class="topbar">
+<h1>Bizworld <span>🇲🇼</span></h1>
+<p>{{count}} real businesses • Blantyre • Lilongwe • Mzuzu</p>
 </div>
 
-<a class="btn-black" href="/add">+ Add Your Business FREE</a>
-{% if is_admin %} <span style="color:green;font-weight:bold"> • ADMIN MODE ON</span> {% endif %}
+<button id="installBtn" style="display:none;margin:12px 16px 0;width:calc(100% - 32px);background:#000;color:#fff;padding:13px;border-radius:14px;border:none;font-weight:bold">📲 Install Bizworld App</button>
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').style.display='block'; });
+document.getElementById('installBtn')?.addEventListener('click', async () => { if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; } });
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
+</script>
 
-<form method="GET" action="/" style="margin-top:12px">
-<input type="text" name="q" value="{{q}}" placeholder="🔍 Search e.g Meruna, pizza, iPhone, dresses...">
+<form method="GET" action="/" class="search-box">
+<input type="text" name="q" value="{{q}}" placeholder="🔍 Search salon, pizza, iPhone...">
 <input type="hidden" name="pw" value="{{pw}}">
-<button type="submit" style="background:#000">Search</button>
+<button type="submit">Search</button>
 </form>
 
-<div class="filter"><b>District:</b><br>
-{% for d in districts %}<a href="/?district={{d}}&category={{cat}}&q={{q}}&pw={{pw}}" class="{{'active' if d==district else ''}}">{{d}}</a>{% endfor %}</div>
-<div class="filter"><b>Category:</b><br>
-{% for c in categories %}<a href="/?district={{district}}&category={{c}}&q={{q}}&pw={{pw}}" class="{{'active' if c==cat else ''}}">{{c}}</a>{% endfor %}</div>
+<div class="promo-banner">
+<div><b>⭐ Be #1 on Bizworld</b><p>Promotion: {{promotion_price}}</p></div>
+<a href="https://wa.me/{{owner_whatsapp}}?text=Hi Bizworld, I want to PROMOTE my business." target="_blank">Promote →</a>
+</div>
+
+<a class="add-btn" href="/add">+ Add Your Business — FREE</a>
+
+<div class="section"><h3>📍 District</h3><div class="chips">
+{% for d in districts %}<a href="/?district={{d}}&category={{cat}}&q={{q}}&pw={{pw}}" class="{{'active' if d==district else ''}}">{{d}}</a>{% endfor %}
+</div></div>
+
+<div class="section"><h3>🛍️ Category</h3><div class="chips">
+{% for c in categories %}<a href="/?district={{district}}&category={{c}}&q={{q}}&pw={{pw}}" class="{{'active' if c==cat else ''}}">{{c}}</a>{% endfor %}
+</div></div>
 
 {% for b in businesses %}
 <div class="card {{'promoted' if b['promoted'] else ''}}">
-{% if b['promoted'] %}<div>⭐ <b>PROMOTED / FEATURED BUSINESS</b></div>{% endif %}
+{% if b['photo'] %}<img class="card-img" src="/uploads/{{b['photo']}}">{% endif %}
+{% if b['video'] %}<video controls src="/uploads/{{b['video']}}" style="width:100%"></video>{% endif %}
+<div class="card-body">
+{% if b['promoted'] %}<span class="badge">⭐ PROMOTED • FEATURED</span> {% else %}<span class="badge-green">✓ VERIFIED BUSINESS</span>{% endif %}
 <h2>{{b['name']}}</h2>
-<p><b>{{b['category']}}</b> • 📍 {{b['town']}}, {{b['district']}}</p>
-<p>{{b['description']}}</p><p>{{b['products']}}</p>
-{% if b['photo'] %}<img src="/uploads/{{b['photo']}}">{% endif %}
-{% if b['video'] %}<video controls src="/uploads/{{b['video']}}"></video>{% endif %}
-<br>
-<a class="btn" href="https://wa.me/{{b['whatsapp']}}?text=Hi, I found you on Bizworld. I want to order." target="_blank">💬 WhatsApp: {{b['phone']}}</a>
-<a href="https://wa.me/{{owner_whatsapp}}?text=Hi Bizworld, I want to PROMOTE my business {{b['name']}}. How much is promotion?" target="_blank" style="display:inline-block;background:#FFD700;color:#000;padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:bold;margin-top:10px;margin-left:5px">⭐ Promote Me</a>
-{% if is_admin %}<br><br>
+<p class="meta">{{b['category']}} • 📍 {{b['town']}}, {{b['district']}}</p>
+<p class="desc">{{b['description']}}</p>
+<div class="prod">{{b['products']}}</div>
+<div class="actions">
+<a class="btn-wa" href="https://wa.me/{{b['whatsapp']}}?text=Hi, I found you on Bizworld. I want to order." target="_blank">💬 WhatsApp</a>
+<a class="btn-promote" href="https://wa.me/{{owner_whatsapp}}?text=Hi Bizworld, I want to PROMOTE my business {{b['name']}}." target="_blank">⭐ Promote Me</a>
+</div>
+{% if is_admin %}<div class="admin-row">
 <a class="btn-red" href="/delete/{{b['id']}}?pw={{pw}}">🗑 Remove</a>
 <a class="btn-gold" href="/promote/{{b['id']}}?pw={{pw}}">{{'Unpromote' if b['promoted'] else '⭐ Promote'}}</a>
-{% endif %}
+</div>{% endif %}
+</div></div>
+{% else %}<p style="text-align:center;padding:20px">No businesses found.</p>{% endfor %}
+
+<div class="bottom-nav">
+<a href="/" class="active"><span>🏠</span>Home</a>
+<a href="/?category=Salon & Cosmetics"><span>💇</span>Salon</a>
+<a href="/?category=Food"><span>🍔</span>Food</a>
+<a href="/add"><span>➕</span>Add</a>
+<a href="https://wa.me/{{owner_whatsapp}}"><span>💬</span>Help</a>
 </div>
-{% else %}<p>No businesses found. Try All.</p>{% endfor %}
-<hr><p style="text-align:center;color:#888">Bizworld Malawi • Made for Malawian Businesses</p>
 """
 
 ADD = BASE_CSS + """
-<h1>+ Add Your Business FREE</h1>
-<p>Fill this form. Add photo / video from your phone. It will appear immediately.</p>
+<div class="topbar"><h1>+ Add Business</h1><p>It will appear immediately</p></div>
+<div style="padding:16px">
 <form method="POST" enctype="multipart/form-data">
 <input name="name" placeholder="Business Name" required>
 <select name="category" required>{% for c in categories %}<option>{{c}}</option>{% endfor %}</select>
@@ -156,10 +211,11 @@ ADD = BASE_CSS + """
 <input name="phone" placeholder="WhatsApp Number e.g 0993066515" required>
 <textarea name="description" placeholder="What do you sell?" required></textarea>
 <input name="products" placeholder="Products e.g Hair, Nails, Cosmetics">
-<label><b>📸 Business Photo (from phone)</b></label><input type="file" name="photo" accept="image/*">
-<label><b>🎥 Business Video (from phone, max 50MB)</b></label><input type="file" name="video" accept="video/*">
-<button type="submit">ADD MY BUSINESS ✅</button>
+<label><b>📸 Business Photo</b></label><input type="file" name="photo" accept="image/*">
+<label><b>🎥 Business Video (max 50MB)</b></label><input type="file" name="video" accept="video/*">
+<button class="submit" type="submit">ADD MY BUSINESS ✅</button>
 </form><br><a href="/">← Back</a>
+</div>
 """
 
 @app.route("/")
@@ -221,6 +277,22 @@ def promote(bid):
 @app.route("/uploads/<name>")
 def uploaded(name):
     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+
+@app.route("/manifest.json")
+def manifest():
+    return send_from_directory(".", "manifest.json", mimetype="application/manifest+json")
+
+@app.route("/sw.js")
+def sw():
+    return send_from_directory(".", "sw.js", mimetype="application/javascript")
+
+@app.route("/icon-192.png")
+def icon192():
+    return send_from_directory(".", "icon-192.png")
+
+@app.route("/icon-512.png")
+def icon512():
+    return send_from_directory(".", "icon-512.png")
 
 if __name__ == "__main__":
     app.run(debug=True)
